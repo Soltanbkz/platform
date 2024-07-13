@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %} Форма распределения {% endblock title %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'course_allocation_view' %}">Распределение курсов</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Форма распределения</li>
+    </ol>
+</nav>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} d-flex align-items-center">
+            <div>{{ message }}</div>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="p-3 card-header text-center text-white">
+                <h3 style="font-size: 20px" class="mb-0">Форма распределения курса</h3>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.lecturer.label_tag }}
+                        {{ form.lecturer }}
+                        <div class="text-danger">{{ form.lecturer.errors }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_program">Программы и курсы</label>
+                        <div id="programs-courses">
+                            {% for program in programs %}
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" id="program-{{ program.id }}" onclick="toggleProgram({{ program.id }})" class="form-check-input">
+                                    <label for="program-{{ program.id }}" class="form-check-label">{{ program.title }}</label>
+                                    <div class="ms-4 mt-2" id="courses-{{ program.id }}">
+                                        {% for course in program.course_set.all %}
+                                            <div class="form-check">
+                                                <input type="checkbox" id="course-{{ course.id }}" name="courses" value="{{ course.id }}" class="form-check-input">
+                                                <label for="course-{{ course.id }}" class="form-check-label">{{ course.title }}</label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-danger">{{ form.courses.errors }}</div>
+                    </div>
+                    <div class="text-center">
+                        <input class="btn btn-primary" type="submit" value="Сохранить">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleProgram(programId) {
+    const programCheckbox = document.getElementById(`program-${programId}`);
+    const coursesDiv = document.getElementById(`courses-${programId}`);
+    const courseCheckboxes = coursesDiv.getElementsByTagName('input');
+
+    for (let i = 0; i < courseCheckboxes.length; i++) {
+        courseCheckboxes[i].checked = programCheckbox.checked;
+    }
+}
+</script>
+
+<style>
+.breadcrumb {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: #007bff;
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 5px;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+.form-check-label {
+    font-size: 16px;
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+</style>
+
+{% endblock content %}

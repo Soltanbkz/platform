@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ video.title }}{% endblock title %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'programs' %}">Курсы</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'program_detail' video.course.program.id %}">{{ video.course.program }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'course_detail' video.course.slug %}">{{ video.course }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ video.title }}</li>
+    </ol>
+</nav>
+
+<p class="title-1">{{ video.title }}</p>
+<br><br>
+
+<style>
+    video {
+        max-width: 100%;
+        -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.16), 0px 2px 10px 0px rgba(0,0,0,0.12);
+    }
+
+    @media (max-width: 1200px) {
+        .display-block {
+            display: block !important;
+        }
+
+        .ms-5 {
+            margin-left: 0 !important;
+         }
+    }
+</style>
+
+<div class="col-md-10 mx-auto d-flex display-block">
+        <div class="col-md-8 ">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <video width="100%" controls>
+                        <source src="{{ video.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p class="mt-3 text-muted"><i class="fas fa-calendar"></i> {{ video.timestamp|timesince }} назад</p>
+
+                    {% if video.summary %}
+                    <p>{{ video.summary }}</p>
+                    {% else %}
+                    <p>Описание видео отсутствует.</p>
+                    {% endif %}
+
+                    {% if video.file %}
+                    <p>
+                        <a href="{{ video.file.url }}" class="btn btn-primary" download>
+                            <i class="fas fa-download"></i> Раздаточный материал
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+<div class="ms-5">
+
+    {% if quizzes %}
+        {% for quiz in quizzes %}
+            {% if forloop.counter0 == video_index %}
+                <div class="col-md-6">
+                    <div style="width: 350px" class="card p-2 quiz-wrapper">
+                        <div class="d-flex justify-content-between align-items-center text-success mb-4">
+                            <em class="text-left">{{ quiz.category|title }} Quiz</em>
+                            <div class="text-right text-light bg-danger px-2 small rounded">
+                                {{ quiz.get_questions.count }} Questions
+                            </div>
+                        </div>
+
+                        <h6>{{ quiz.title|title }}</h6>
+
+                        {% if quiz.description %}
+                        <p class="text-muted small">{{ quiz.description }}</p>
+                        {% else %}
+                        <p class="text-muted small">No description set.</p>
+                        {% endif %}
+
+                        {% if quiz.single_attempt %}
+                        <p class="p-2 bg-light-warning small">{% trans "You will only get one attempt at this quiz" %}.</p>
+                        {% endif %}
+
+                        <div class="d-flex align-items-center">
+                            <a class="btn btn-block btn-primary w-100" href="{% url 'quiz_take' video.course.pk quiz.slug %}">{% trans "Начать тест" %} &raquo;</a>
+
+                            {% if request.user.is_superuser or request.user.is_lecturer %}
+                                <div class="dropup">
+                                    <button class="btn btn-sm p-0 ms-2" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v m-0"></i></button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdown01">
+                                        <div class="dropdown-item">
+                                            <a href="{% url 'quiz_update' slug=video.course.slug pk=quiz.pk %}" class="update"><i class="fas fa-pencil-alt"></i> Edit</a>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <a href="{% url 'quiz_delete' slug=video.course.slug pk=quiz.pk %}" class="delete"><i class="fas fa-trash-alt"></i> Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <div class="col-md-12 mx-auto">
+    <div class="d-flex justify-content-between mt-5">
+        {% if video.get_previous_video %}
+            <a href="{% url 'video_single' slug=video.course.slug video_slug=video.get_previous_video.slug %}" class="btn btn-primary btn-sm m-1">Предыдущий</a>
+        {% else %}
+            <span class="btn btn-secondary btn-sm disabled m-1">Предыдущий</span>
+        {% endif %}
+
+        {% if video.get_next_video %}
+            <a href="{% url 'video_single' slug=video.course.slug video_slug=video.get_next_video.slug %}" class="btn btn-primary btn-sm m-1">Следующий</a>
+        {% else %}
+            <span class="btn btn-secondary btn-sm disabled m-1">Следующий</span>
+        {% endif %}
+    </div>
+</div>
+</div>
+</div>
+
+{% endblock content %}

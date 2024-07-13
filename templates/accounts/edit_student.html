@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать Студента{% endblock title %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb" class="my-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'student_list' %}">Студент</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Изменить</li>
+    </ol>
+</nav>
+
+<h4 class="fw-bold mb-4"><i class="fas fa-cog me-2"></i>Форма обновления студента</h4>
+
+{% include 'snippets/messages.html' %}
+
+<form action="" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="row mb-3">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Электронная почта и личная информация</h5>
+                </div>
+                <div class="card-body">
+                    {{ form.email|as_crispy_field }}
+                    {{ form.first_name|as_crispy_field }}
+                    {{ form.last_name|as_crispy_field }}
+                    {{ form.gender|as_crispy_field }}
+                    {{ form.phone|as_crispy_field }}
+                    {{ form.address|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">Другое</h5>
+                </div>
+                <div class="card-body">
+                    {{ form.picture|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <input class="btn btn-primary btn-lg" type="submit" value="Сохранить">
+    </div>
+</form>
+{% endblock content %}

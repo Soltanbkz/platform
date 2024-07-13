@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %} Видео-уроки{% endblock title %}
+{% load static %}
+
+{% block content %}
+<style>
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        object-fit: cover;
+        height: 200px;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+
+    .card-text {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .picture_t {
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    @media (max-width: 576px) {
+        .manage-wrap .d-flex {
+            display: none;
+        }
+
+        .desktop-actions {
+            display:none;
+        }
+
+        .mobile-icons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .mobile-icons .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            text-align: center;
+        }
+
+        .mobile-icons .btn i {
+            font-size: 18px;
+        }
+    }
+
+    @media (min-width: 577px) {
+        .mobile-icons {
+            display: none;
+        }
+    }
+</style>
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'programs' %}">Курсы</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'program_detail' course.program.id %}">{{ course.program }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ course }}</li>
+    </ol>
+</nav>
+
+<div class="manage-wrap">
+    <div class="d-flex">
+        <div class="desktop-actions">
+            {% if request.user.is_superuser %}
+            <a class="btn btn-sm btn-light" href="{% url 'edit_course' course.slug %}">
+                <i class="fas fa-pencil-alt"></i> Edit course
+            </a>
+            {% endif %}
+            {% if request.user.is_superuser or request.user.is_lecturer %}
+            <a  class="btn btn-sm btn-primary" href="{% url 'upload_video' course.slug %}"><i class="fas fa-plus"></i>
+                Upload new video
+            </a>
+            {% endif %}
+        </div>
+        <div class="ms-auto desktop-actions">
+            <a style="color: white;" class="btn btn-sm btn-warning" href="{% url 'quiz_index' course.slug %}"><i class="fas fa-list"></i>
+                Take a Quiz
+            </a>
+        </div>
+    </div>
+<div class="mobile-icons">
+    {% if request.user.is_superuser %}
+    <a class="btn btn-sm btn-light" href="{% url 'edit_course' course.slug %}" title="Edit course">
+        <i class="fas fa-pencil-alt"></i>
+    </a>
+    {% endif %}
+    {% if request.user.is_superuser or request.user.is_lecturer %}
+    <a style="border: none;" class="btn btn-sm" href="{% url 'upload_video' course.slug %}" title="Upload new video">
+        <i class="fas fa-plus"></i>
+    </a>
+    {% endif %}
+    <a style="border: none;" class="btn btn-sm" href="{% url 'quiz_index' course.slug %}" title="Take a Quiz">
+        <i class="fas fa-list"></i>
+    </a>
+</div>
+
+</div>
+
+<div class="title-1">{{ course }}</div>
+<p class="small text-muted">{{ course.summary }}</p>
+
+{% include 'snippets/messages.html' %}
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-md-12 p-0">
+            <div class="row">
+                {% for video in videos %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if video.thumbnail %}
+                        <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}">
+                        {% else %}
+                        <img src="{% static 'img/default-thumbnail.png' %}" class="card-img-top" alt="{{ video.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ video.title|title }}</h5>
+                            <p class="card-text">{{ video.timestamp|date }}</p>
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ video.get_absolute_url }}" class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i> Play now
+                                </a>
+                                {% if request.user.is_superuser or request.user.is_lecturer %}
+                                <div class="update-delete">
+                                    <a href="{% url 'upload_video_edit' slug=course.slug video_slug=video.slug %}"
+                                        class="update" title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a href="{% url 'upload_video_delete' slug=course.slug video_slug=video.slug %}"
+                                        class="delete" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-md-12 text-center">
+                    <span class="text-danger">
+                        Видео еще не загружено
+                        {% if request.user.is_superuser or request.user.is_lecturer %}
+                        <a href="{% url 'upload_video' course.slug %}">
+                            <i class="primary" style="font-size: 22px;">
+                                Загрузить сейчас
+                            </i>
+                        </a>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if lecturers.lecturer %}
+<div class="site-section mb-5 mt-4">
+    <div class="title-1">Кураторы</div>
+    <br>
+    <br>
+    <div class="container-fluid">
+        <div class="row">
+            {% for lecturer in lecturers %}
+            <div class="col-lg-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        {% if lecturer.lecturer.picture %}
+                        <img class=" avatar-lg" src="{{ lecturer.lecturer.picture.url }}" alt="">
+                        {% endif %}
+                        <h5 class="fw-bold mb-0">{{ lecturer|title }}</h5>
+                        <p class="mb-0">{{ lecturer.lecturer.email }}</p>
+                        <br>
+                        <p>
+                            <a class="btn btn-sm btn-secondary" href="#" role="button"><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-sm btn-secondary" href="#" role="button"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-sm btn-secondary" href="#" role="button"><i class="fab fa-telegram"></i></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-lg-12 text-center">
+                <h6 class="text-muted mt-3">No lecturer assigned for this course</h6>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock content %}

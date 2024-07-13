@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %} Загрузить видео{% endblock title %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'programs' %}">Курсы</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'program_detail' course.program.id %}">{{ course.program }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'course_detail' course.slug %}">{{ course }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Загрузить видео</li>
+    </ol>
+</nav>
+
+<p class="title-1">Загрузить видео для {{ course|truncatechars:25 }}</p>
+<div class="title-line"></div><br>
+
+{% include 'snippets/messages.html' %}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Форма Видео</h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" type="submit">Загрузить</button>
+                        <a class="btn btn-danger" href="{% url 'course_detail' course.slug %}">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

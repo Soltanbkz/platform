@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %} Мои курсы{% endblock title %}
+{% load static %}
+
+{% block content %}
+<style>
+.modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 0 15px;
+    transition: all 1s ease;
+}
+
+.course {
+    background: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 20px;
+    position: relative;
+}
+
+.course:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.module-name {
+    color: #00538E;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.buttons .go {
+    border: 1px solid #3949AB;
+    background-color: inherit;
+    border-radius: 40px;
+    color: #3949AB;
+    width: 100px;
+    height: 40px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropstart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.dropstart button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 992px) {
+    .modules {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .modules {
+        grid-template-columns: 1fr; /* Для маленьких экранов */
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.pagination a {
+    color: #3949AB;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.pagination a:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination-active {
+    background-color: #3949AB;
+    color: #FFFFFF;
+}
+
+</style>
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Mои курсы</li>
+    </ol>
+</nav>
+
+{% if request.user.is_student %}
+    <div class="title-1">{{ student.program.title }}</div>
+    {% if student.program.summary %}
+        <p>{{ student.program.summary }}</p>
+    {% endif %}
+{% endif %}
+
+{% if request.user.is_lecturer %}
+    <div class="title-1">Мои курсы</div>
+{% endif %}
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>{{ message }}
+            </div>
+        {% else %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>{{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="modules">
+    {% if courses %}
+        {% for course in courses %}
+            <div class="course">
+                <a href="{{ course.get_absolute_url }}"><p class="module-name">{{ course.title }}</p></a>
+                <p>{{ course.code }}</p>
+                <div class="d-flex justify-content-between me-2">
+                    <div class="buttons">
+                        <a href="{{ course.get_absolute_url }}"><button class="go">Перейти</button></a>
+                    </div>
+                    {% if request.user.is_superuser %}
+                        <div class="dropstart">
+                            <button style="border: none" class="btn btn-sm" type="button" data-bs-toggle="dropdown"
+                            data-bs-boundary="window" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v m-0"></i>
+                            </button>
+                            <div class="dropdown-menu position-fixed">
+                                <a class="dropdown-item" href="{% url 'edit_course' slug=course.slug %}">
+                                    <i class="fas fa-pencil-alt"></i> Изменить
+                                </a>
+                                <a class="dropdown-item" href="{% url 'delete_course' slug=course.slug %}">
+                                    <i class="fas fa-trash-alt"></i> Удалить
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <span class="text-danger">No courses available.</span>
+        {% if request.user.is_superuser %}
+            <a href="{% url 'course_add' pk=program.pk %}">
+                <i class="primary" style="font-size: 22px;">Add one now.</i>
+            </a>
+        {% endif %}
+    {% endif %}
+</div>
+{% if courses.paginator.page_range|length > 1 %}
+<div class="content-center">
+    <div class="pagination">
+        <a href="?page=1">&laquo;</a>
+        {% for i in courses.paginator.page_range %}
+            {% if i == courses.number %}
+                <a class="pagination-active" href="?page={{ i }}"><b>{{ i }}</b></a>
+            {% else %}
+                <a href="?page={{ i }}">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+        <a href="?page={{ courses.paginator.num_pages }}">&raquo;</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock content %}

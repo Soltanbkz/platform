@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Добавить Модуль {% endblock title %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'programs' %}">Курсы</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Форма Модуля</li>
+    </ol>
+</nav>
+
+<div class="title-1 text-center mb-4">Course Form</div>
+
+{% include 'snippets/messages.html' %}
+
+<form action="" method="POST" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Course Details</h5>
+                </div>
+                <div class="card-body">
+                    {{ form.title|as_crispy_field }}
+                    {{ form.code|as_crispy_field }}
+                    {{ form.summary|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">Other Information</h5>
+                </div>
+                <div class="card-body">
+                    {{ form.program|as_crispy_field }}
+                    <div style="display: none;">{{ form.credit|as_crispy_field }}</div>
+                    <div style="display: none;">{{ form.year|as_crispy_field }}</div>
+                    <div style="display: none;">{{ form.semester|as_crispy_field }}</div>
+                    <div style="display: none;">{{ form.level|as_crispy_field }}</div>
+                    <div style="display: none;">{{ form.is_elective|as_crispy_field }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <button class="btn btn-success btn-lg mt-3" type="submit">Сохранить</button>
+    </div>
+</form>
+
+{% endblock content %}
