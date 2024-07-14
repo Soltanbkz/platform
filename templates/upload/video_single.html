@@ -40,7 +40,8 @@
         <div class="col-md-8 ">
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <video width="100%" controls>
+                    <!-- Установка атрибута controls для воспроизведения видео и запрета на скачивание -->
+                    <video width="100%" controls controlsList="nodownload">
                         <source src="{{ video.video.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
