@@ -1,19 +1,15 @@
 import os
-from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="o!ld8nrt4vc*h1zoey*wj48x*q0#ss12h=+zh)kk^6b3aygg=!")
+SECRET_KEY = "o!ld8nrt4vc*h1zoey*wj48x*q0#ss12h=+zh)kk^6b3aygg=!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = False
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,soltanbekovbeknazar.kz").split(",")
+ALLOWED_HOSTS = ["127.0.0.1", "soltanbekovbeknazar.kz"]
 
 # Change the default user model to our custom model
 AUTH_USER_MODEL = "accounts.User"
@@ -146,14 +142,14 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Email configuration
-EMAIL_HOST = config("EMAIL_HOST", default='smtp.mail.ru')
-EMAIL_PORT = config("EMAIL_PORT", default=465)
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default='beknazarplatform@mail.ru')
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default='z1mXPgywTE00Drxhsk6Y')
-EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default='beknazarplatform@mail.ru')
+EMAIL_HOST_USER = 'beknazarplatform@mail.ru'
+EMAIL_HOST_PASSWORD = 'z1mXPgywTE00Drxhsk6Y'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'beknazarplatform@mail.ru'
 
 # DRF setup
 REST_FRAMEWORK = {
@@ -167,8 +163,8 @@ REST_FRAMEWORK = {
 }
 
 # Stripe payment config
-STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
-STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_SECRET_KEY = ""
+STRIPE_PUBLISHABLE_KEY = ""
 
 # Logging configuration
 LOGGING = {
@@ -190,8 +186,8 @@ LOGGING = {
 }
 
 # Custom ID prefixes
-STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
-LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")
+STUDENT_ID_PREFIX = "ugr"
+LECTURER_ID_PREFIX = "lec"
 
 # Jazzmin settings
 JAZZMIN_SETTINGS = {
