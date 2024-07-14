@@ -12,7 +12,6 @@ class ProgramForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["title"].widget.attrs.update({"class": "form-control"})
         self.fields["summary"].widget.attrs.update({"class": "form-control"})
-        self.fields["thumbnail"].widget.attrs.update({"class": "form-control"})
 
 
 class CourseAddForm(forms.ModelForm):
