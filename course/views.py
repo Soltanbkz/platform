@@ -411,7 +411,7 @@ def handle_video_upload(request, slug):
 
     return render(
         request,
-        "course/upload_video.html",
+        "course/upload_video_form.html",
         {
             "title": "Upload Video",
             "form": form,
