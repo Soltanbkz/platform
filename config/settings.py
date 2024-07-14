@@ -18,7 +18,6 @@ AUTH_USER_MODEL = "accounts.User"
 
 DJANGO_APPS = [
     "jazzmin",
-    "jet.dashboard",
     "jet",
     "django_extensions",
     "django.contrib.admin",
