@@ -8,16 +8,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config(
-    "SECRET_KEY", default="o!ld8nrt4vc*h1zoey*wj48x*q0#ss12h=+zh)kk^6b3aygg=!"
-)
+SECRET_KEY = config("SECRET_KEY", default="o!ld8nrt4vc*h1zoey*wj48x*q0#ss12h=+zh)kk^6b3aygg=!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ["127.0.0.1", "your-domain.com"]
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,soltanbekovbeknazar.kz").split(",")
 
-# change the default user models to our custom model
+# Change the default user model to our custom model
 AUTH_USER_MODEL = "accounts.User"
 
 # Application definition
@@ -65,7 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    #"whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise to serve static files
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Whitenoise to serve static files
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -81,47 +79,32 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # 'django.template.context_processors.i18n',
-                # 'django.template.context_processors.media',
-                # 'django.template.context_processors.static',
-                # 'django.template.context_processors.tz',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
-
 ASGI_APPLICATION = "config.asgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-# -----------------------------
-# NOTE: Some model fields may not work on sqlite db,
-# so consider using postgresql instead
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, os.getenv('DB_NAME', 'db.sqlite3')),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', 'localhost'),
+        'PORT': config('DB_PORT', '5432'),
     }
 }
-
 
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -140,43 +123,34 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
-
 LANGUAGE_CODE = "ru"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
 
+# WhiteNoise configuration
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # Media files config
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# -----------------------------------
+# Email configuration
 EMAIL_HOST = config("EMAIL_HOST", default='smtp.mail.ru')
 EMAIL_PORT = config("EMAIL_PORT", default=465)
 EMAIL_USE_TLS = False
@@ -185,13 +159,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default='beknazarplatform@mail.ru')
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default='z1mXPgywTE00Drxhsk6Y')
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default='beknazarplatform@mail.ru')
-
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-
 
 # DRF setup
 REST_FRAMEWORK = {
@@ -204,22 +171,17 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Strip payment config
+# Stripe payment config
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
 
-# LOGGING
-# ------------------------------------------------------------------------------
-# https://docs.djangoproject.com/en/dev/ref/settings/#logging
-# See https://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# Logging configuration
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s "
-            "%(process)d %(thread)d %(message)s"
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
         }
     },
     "handlers": {
@@ -232,15 +194,11 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
-# WhiteNoise configuration
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
+# Custom ID prefixes
 STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
 LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# Jazzmin settings
 JAZZMIN_SETTINGS = {
     "site_title": "Admin Panel",
     "site_logo": "img/logo.png",
