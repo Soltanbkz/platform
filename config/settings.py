@@ -162,19 +162,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
-STATIC_URL = "/static/"
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    BASE_DIR / 'static',
 ]
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
-STATICFILES_FINDERS = [
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files config
 MEDIA_URL = "/media/"
