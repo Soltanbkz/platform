@@ -39,13 +39,6 @@ class CourseAllocationForm(forms.ModelForm):
         ),
         required=True,
     )
-    program = forms.ModelMultipleChoiceField(
-        queryset=Program.objects.all().order_by("title"),
-        widget=forms.CheckboxSelectMultiple(
-            attrs={"class": "browser-default checkbox"}
-        ),
-        required=True,
-    )
     lecturer = forms.ModelChoiceField(
         queryset=User.objects.filter(is_lecturer=True),
         widget=forms.Select(attrs={"class": "browser-default custom-select"}),
@@ -54,13 +47,12 @@ class CourseAllocationForm(forms.ModelForm):
 
     class Meta:
         model = CourseAllocation
-        fields = ["lecturer", "courses", "program"]
+        fields = ["lecturer", "courses"]
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
+        user = kwargs.pop("user")
         super(CourseAllocationForm, self).__init__(*args, **kwargs)
         self.fields["lecturer"].queryset = User.objects.filter(is_lecturer=True)
-
 
 class EditCourseAllocationForm(forms.ModelForm):
     courses = forms.ModelMultipleChoiceField(

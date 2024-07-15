@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
-{% block title %} Форма распределения {% endblock title %}
+{% block title %}{{ title }} | Система управления обучением{% endblock title %}
 {% load crispy_forms_tags %}
 {% load static %}
 
 {% block content %}
+
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Главная</a></li>
@@ -14,17 +15,23 @@
 
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} d-flex align-items-center">
-            <div>{{ message }}</div>
-        </div>
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger d-flex align-items-center">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+            </div>
+        {% else %}
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i> {{ message }}
+            </div>
+        {% endif %}
     {% endfor %}
 {% endif %}
 
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-md-8">
         <div class="card shadow-sm">
-            <div class="p-3 card-header text-center text-white">
-                <h3 style="font-size: 20px" class="mb-0">Форма распределения курса</h3>
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">Форма распределения курсов</h4>
             </div>
             <div class="card-body">
                 <form action="" method="POST">
@@ -35,22 +42,9 @@
                         <div class="text-danger">{{ form.lecturer.errors }}</div>
                     </div>
                     <div class="mb-3">
-                        <label for="id_program">Программы и курсы</label>
-                        <div id="programs-courses">
-                            {% for program in programs %}
-                                <div class="form-check mb-3">
-                                    <input type="checkbox" id="program-{{ program.id }}" onclick="toggleProgram({{ program.id }})" class="form-check-input">
-                                    <label for="program-{{ program.id }}" class="form-check-label">{{ program.title }}</label>
-                                    <div class="ms-4 mt-2" id="courses-{{ program.id }}">
-                                        {% for course in program.course_set.all %}
-                                            <div class="form-check">
-                                                <input type="checkbox" id="course-{{ course.id }}" name="courses" value="{{ course.id }}" class="form-check-input">
-                                                <label for="course-{{ course.id }}" class="form-check-label">{{ course.title }}</label>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endfor %}
+                        {{ form.courses.label_tag }}
+                        <div class="form-check">
+                            {{ form.courses }}
                         </div>
                         <div class="text-danger">{{ form.courses.errors }}</div>
                     </div>
@@ -63,26 +57,7 @@
     </div>
 </div>
 
-<script>
-function toggleProgram(programId) {
-    const programCheckbox = document.getElementById(`program-${programId}`);
-    const coursesDiv = document.getElementById(`courses-${programId}`);
-    const courseCheckboxes = coursesDiv.getElementsByTagName('input');
-
-    for (let i = 0; i < courseCheckboxes.length; i++) {
-        courseCheckboxes[i].checked = programCheckbox.checked;
-    }
-}
-</script>
-
 <style>
-.breadcrumb {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .alert {
     display: flex;
     align-items: center;
@@ -109,17 +84,11 @@ function toggleProgram(programId) {
     border-radius: 5px;
 }
 
-.form-check-input {
-    margin-right: 10px;
-}
-
-.form-check-label {
-    font-size: 16px;
-}
-
 .form-title {
     font-size: 24px;
     font-weight: bold;
+    text-align: center;
+    padding-top: 10px;
 }
 </style>
 

@@ -198,7 +198,7 @@ class ProfileUpdateForm(UserChangeForm):
 
     phone = forms.CharField(
         widget=forms.TextInput(attrs={"type": "text", "class": "form-control"}),
-        label="Phone No.",
+        label="Phone",
     )
 
     class Meta:
@@ -230,7 +230,7 @@ class ParentAddForm(UserCreationForm):
     phone = forms.CharField(
         max_length=30,
         widget=forms.TextInput(attrs={"type": "text", "class": "form-control"}),
-        label="Mobile No.",
+        label="Mobile",
     )
 
     first_name = forms.CharField(

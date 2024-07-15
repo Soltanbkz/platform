@@ -1,4 +1,3 @@
-from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Sum, Avg, Max, Min, Count
@@ -12,7 +11,6 @@ from django_filters.views import FilterView
 
 from accounts.models import User, Student
 from core.models import Session, Semester
-from quiz.models import Quiz
 from result.models import TakenCourse
 from accounts.decorators import lecturer_required, student_required
 from .forms import (
@@ -35,7 +33,6 @@ class ProgramFilterView(FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Programs"
-        context["filter"] = self.get_filterset(self.get_filterset_class())
         return context
 
 
@@ -123,6 +120,9 @@ def program_delete(request, pk):
 
 
 # ########################################################
+
+
+# ########################################################
 # Course views
 # ########################################################
 @login_required
@@ -131,6 +131,7 @@ def course_single(request, slug):
     files = Upload.objects.filter(course__slug=slug)
     videos = UploadVideo.objects.filter(course__slug=slug)
 
+    # lecturers = User.objects.filter(allocated_lecturer__pk=course.id)
     lecturers = CourseAllocation.objects.filter(courses__pk=course.id)
 
     return render(
@@ -138,7 +139,6 @@ def course_single(request, slug):
         "course/course_single.html",
         {
             "title": course.title,
-            "slug": slug,
             "course": course,
             "files": files,
             "videos": videos,
@@ -203,7 +203,7 @@ def course_edit(request, slug):
         "course/course_add.html",
         {
             "title": "Edit Course",
-            "slug": slug,
+            # 'form': form, 'program': pk, 'course': pk
             "form": form,
         },
     )
@@ -213,6 +213,7 @@ def course_edit(request, slug):
 @lecturer_required
 def course_delete(request, slug):
     course = Course.objects.get(slug=slug)
+    # course_name = course.title
     course.delete()
     messages.success(request, "Course " + course.title + " has been deleted.")
 
@@ -220,9 +221,11 @@ def course_delete(request, slug):
 
 
 # ########################################################
+
+
+# ########################################################
 # Course Allocation
 # ########################################################
-
 @method_decorator([login_required], name="dispatch")
 class CourseAllocationFormView(CreateView):
     form_class = CourseAllocationForm
@@ -234,26 +237,26 @@ class CourseAllocationFormView(CreateView):
         return kwargs
 
     def form_valid(self, form):
+        # if a staff has been allocated a course before update it else create new
         lecturer = form.cleaned_data["lecturer"]
         selected_courses = form.cleaned_data["courses"]
-        courses = tuple(course.pk for course in selected_courses)
+        courses = ()
+        for course in selected_courses:
+            courses += (course.pk,)
+        # print(courses)
 
         try:
-            allocation = CourseAllocation.objects.get(lecturer=lecturer)
-        except CourseAllocation.DoesNotExist:
-            allocation = CourseAllocation.objects.create(lecturer=lecturer)
-
-        for course in selected_courses:
-            allocation.courses.add(course)
-
-        allocation.save()
+            a = CourseAllocation.objects.get(lecturer=lecturer)
+        except:
+            a = CourseAllocation.objects.create(lecturer=lecturer)
+        for i in range(0, selected_courses.count()):
+            a.courses.add(courses[i])
+            a.save()
         return redirect("course_allocation_view")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Assign Course"
-        context["programs"] = Program.objects.prefetch_related('course_set').all()
-        context["form"] = CourseAllocationForm(user=self.request.user)
         return context
 
 
@@ -264,33 +267,13 @@ class CourseAllocationFilterView(FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "Course Allocations"
-        context["form"] = CourseAllocationForm(user=self.request.user)
-        context["filter"] = self.get_filterset(self.get_filterset_class())
-        context["programs"] = Program.objects.all()
+        context["title"] = "Распределение курсов"
         return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-
-@login_required
-@lecturer_required
-def deallocate_course(request, pk):
-    course = get_object_or_404(CourseAllocation, pk=pk)
-    course.delete()
-    messages.success(request, "Successfully deallocated!")
-    return redirect("course_allocation_view")
-
 
 @login_required
 @lecturer_required
 def edit_allocated_course(request, pk):
     allocated = get_object_or_404(CourseAllocation, pk=pk)
-    programs = Program.objects.prefetch_related('courses').all()
-
     if request.method == "POST":
         form = EditCourseAllocationForm(request.POST, instance=allocated)
         if form.is_valid():
@@ -303,8 +286,20 @@ def edit_allocated_course(request, pk):
     return render(
         request,
         "course/course_allocation_form.html",
-        {"title": "Edit Course Allocated", "form": form, "allocated": pk, 'programs': programs},
+        {"title": "Edit Course Allocated", "form": form, "allocated": pk},
     )
+
+
+@login_required
+@lecturer_required
+def deallocate_course(request, pk):
+    course = CourseAllocation.objects.get(pk=pk)
+    course.delete()
+    messages.success(request, "successfully deallocate!")
+    return redirect("course_allocation_view")
+
+
+# ########################################################
 
 
 # ########################################################
@@ -322,68 +317,49 @@ def handle_file_upload(request, slug):
             obj.save()
 
             messages.success(
-                request, (request.POST.get("title") + " has been uploaded successfully.")
+                request, (request.POST.get("title") + " has been uploaded.")
             )
-            return redirect("course_single", slug=slug)
-        else:
-            messages.error(request, "Correct the error(s) below.")
+            return redirect("course_detail", slug=slug)
     else:
         form = UploadFormFile()
-
     return render(
         request,
-        "course/upload_file.html",
-        {
-            "title": "Upload File",
-            "form": form,
-            "slug": slug,
-            "course": course,
-        },
+        "upload/upload_file_form.html",
+        {"title": "File Upload", "form": form, "course": course},
     )
 
 
 @login_required
 @lecturer_required
-def handle_file_edit(request, slug, pk):
+def handle_file_edit(request, slug, file_id):
     course = Course.objects.get(slug=slug)
-    file = get_object_or_404(Upload, pk=pk)
-
+    instance = Upload.objects.get(pk=file_id)
     if request.method == "POST":
-        form = UploadFormFile(request.POST, request.FILES, instance=file)
+        form = UploadFormFile(request.POST, request.FILES, instance=instance)
+        # file_name = request.POST.get('name')
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.course = course
-            obj.save()
-
+            form.save()
             messages.success(
-                request, (request.POST.get("title") + " has been updated successfully.")
+                request, (request.POST.get("title") + " has been updated.")
             )
-            return redirect("course_single", slug=slug)
-        else:
-            messages.error(request, "Correct the error(s) below.")
+            return redirect("course_detail", slug=slug)
     else:
-        form = UploadFormFile(instance=file)
+        form = UploadFormFile(instance=instance)
 
     return render(
         request,
-        "course/upload_file.html",
-        {
-            "title": "Edit File",
-            "form": form,
-            "slug": slug,
-            "course": course,
-        },
+        "upload/upload_file_form.html",
+        {"title": instance.title, "form": form, "course": course},
     )
 
 
-@login_required
-@lecturer_required
-def handle_file_delete(request, slug, pk):
-    file = Upload.objects.get(pk=pk)
+def handle_file_delete(request, slug, file_id):
+    file = Upload.objects.get(pk=file_id)
+    # file_name = file.name
     file.delete()
-    messages.success(request, file.title + " has been deleted successfully.")
 
-    return redirect("course_single", slug=slug)
+    messages.success(request, (file.title + " has been deleted."))
+    return redirect("course_detail", slug=slug)
 
 
 # ########################################################
@@ -401,78 +377,56 @@ def handle_video_upload(request, slug):
             obj.save()
 
             messages.success(
-                request, (request.POST.get("title") + " has been uploaded successfully.")
+                request, (request.POST.get("title") + " has been uploaded.")
             )
-            return redirect("course_single", slug=slug)
-        else:
-            messages.error(request, "Correct the error(s) below.")
+            return redirect("course_detail", slug=slug)
     else:
         form = UploadFormVideo()
-
     return render(
         request,
-        "course/upload_video_form.html",
-        {
-            "title": "Upload Video",
-            "form": form,
-            "slug": slug,
-            "course": course,
-        },
+        "upload/upload_video_form.html",
+        {"title": "Video Upload", "form": form, "course": course},
     )
+
 
 @login_required
 # @lecturer_required
 def handle_video_single(request, slug, video_slug):
     course = get_object_or_404(Course, slug=slug)
-    video = get_object_or_404(UploadVideo, course__slug=slug, slug=video_slug)
-    videos = UploadVideo.objects.filter(course=video.course).order_by('id')
-    quiz = Quiz.objects.filter(course=video.course).first()
-    video_index = list(videos).index(video)
-    quizzes = Quiz.objects.filter(course=video.course).order_by('id')
-    return render(request, "upload/video_single.html", {"video": video, 'video_index': video_index,'quizzes': quizzes,})
+    video = get_object_or_404(UploadVideo, slug=video_slug)
+    return render(request, "upload/video_single.html", {"video": video})
+
 
 @login_required
 @lecturer_required
-def handle_video_edit(request, slug, pk):
+def handle_video_edit(request, slug, video_slug):
     course = Course.objects.get(slug=slug)
-    video = get_object_or_404(UploadVideo, pk=pk)
-
+    instance = UploadVideo.objects.get(slug=video_slug)
     if request.method == "POST":
-        form = UploadFormVideo(request.POST, request.FILES, instance=video)
+        form = UploadFormVideo(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.course = course
-            obj.save()
-
+            form.save()
             messages.success(
-                request, (request.POST.get("title") + " has been updated successfully.")
+                request, (request.POST.get("title") + " has been updated.")
             )
-            return redirect("course_single", slug=slug)
-        else:
-            messages.error(request, "Correct the error(s) below.")
+            return redirect("course_detail", slug=slug)
     else:
-        form = UploadFormVideo(instance=video)
+        form = UploadFormVideo(instance=instance)
 
     return render(
         request,
-        "course/upload_video.html",
-        {
-            "title": "Edit Video",
-            "form": form,
-            "slug": slug,
-            "course": course,
-        },
+        "upload/upload_video_form.html",
+        {"title": instance.title, "form": form, "course": course},
     )
 
 
-@login_required
-@lecturer_required
-def handle_video_delete(request, slug, pk):
-    video = UploadVideo.objects.get(pk=pk)
+def handle_video_delete(request, slug, video_slug):
+    video = get_object_or_404(UploadVideo, slug=video_slug)
+    # video = UploadVideo.objects.get(slug=video_slug)
     video.delete()
-    messages.success(request, video.title + " has been deleted successfully.")
 
-    return redirect("course_single", slug=slug)
+    messages.success(request, (video.title + " has been deleted."))
+    return redirect("course_detail", slug=slug)
 
 
 # ########################################################
@@ -593,7 +547,7 @@ def user_course_list(request):
         taken_courses = TakenCourse.objects.filter(
             student__student__id=student.student.id
         )
-        courses = Course.objects.filter().filter(
+        courses = Course.objects.filter(level=student.level).filter(
             program__pk=student.program.id
         )
 

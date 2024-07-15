@@ -17,7 +17,7 @@ class NewsAndEventsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["title"].widget.attrs.update({"class": "form-control"})
-        self.fields["summarcy"].widget.attrs.update({"class": "form-control"})
+        self.fields["summary"].widget.attrs.update({"class": "form-control"})
         self.fields["posted_as"].widget.attrs.update({"class": "form-control"})
 
 

@@ -56,7 +56,6 @@ class ProgramManager(models.Manager):
 class Program(models.Model):
     title = models.CharField(max_length=150, unique=True)
     summary = models.TextField(null=True, blank=True)
-    thumbnail = models.ImageField(upload_to='program_thumbnails/', null=True, blank=True)
 
     objects = ProgramManager()
 
@@ -142,7 +141,6 @@ class CourseAllocation(models.Model):
         on_delete=models.CASCADE,
         related_name="allocated_lecturer",
     )
-    program = models.ManyToManyField(Program, related_name="courses")
     courses = models.ManyToManyField(Course, related_name="allocated_course")
     session = models.ForeignKey(
         "core.Session", on_delete=models.CASCADE, blank=True, null=True
