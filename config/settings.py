@@ -246,6 +246,6 @@ JAZZMIN_SETTINGS = {
     "site_logo": "img/logo.png",
 }
 
-#CSRF_TRUSTED_ORIGINS = ['http://soltanbekovbeknazar.kz']
+CSRF_TRUSTED_ORIGINS = ['http://soltanbekovbeknazar.kz']
 
 SECURE_SSL_REDIRECT = False
