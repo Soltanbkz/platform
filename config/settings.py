@@ -247,5 +247,3 @@ JAZZMIN_SETTINGS = {
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://soltanbekovbeknazar.kz']
-
-SECURE_SSL_REDIRECT = False
