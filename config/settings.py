@@ -13,9 +13,9 @@ SECRET_KEY = config(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["46.226.123.72", "soltanbekovbeknazar.kz"]
+ALLOWED_HOSTS = ["127.0.0.1", "soltanbekovbeknazar.kz"]
 
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
@@ -246,4 +246,6 @@ JAZZMIN_SETTINGS = {
     "site_logo": "img/logo.png",
 }
 
-CSRF_TRUSTED_ORIGINS = ['http://soltanbekovbeknazar.kz']
+#CSRF_TRUSTED_ORIGINS = ['http://soltanbekovbeknazar.kz']
+
+SECURE_SSL_REDIRECT = False

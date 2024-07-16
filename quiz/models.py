@@ -1,5 +1,7 @@
 import re
 import json
+import pkg_resources
+
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError, ImproperlyConfigured
@@ -7,7 +9,6 @@ from django.core.validators import (
     MaxValueValidator,
     validate_comma_separated_integer_list,
 )
-import pkg_resources
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.conf import settings
