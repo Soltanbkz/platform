@@ -13,7 +13,7 @@ SECRET_KEY = config(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", "soltanbekovbeknazar.kz"]
 
@@ -165,7 +165,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = '/root/code/platform/static/'
+STATIC_ROOT = '/root/code/platform/staticfiles/'
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
