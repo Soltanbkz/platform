@@ -1,4 +1,4 @@
-command = '/root/code/platform/env/bin/gunicorn'
+command = '/root/code/platform/venv/bin/gunicorn'
 pythonpath = '/root/code/platform'
 bind = '127.0.0.1:8001'
 workers = 5
