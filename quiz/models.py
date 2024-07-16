@@ -1,6 +1,5 @@
 import re
 import json
-import pkg_resources
 
 from django.db import models
 from django.urls import reverse
